@@ -4,5 +4,10 @@
     "license": "MIT",
     "require": {
         "react/stream": "^0.7.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "Rakdar\\React\\Csv\\": "src/"
+        }
     }
 }

@@ -24,7 +24,7 @@ class Reader implements EventEmitterInterface
     /** @var resource $buffer */
     private $buffer;
     private $paused = false;
-    private $delimiter = ";";
+    private $delimiter = ",";
     private $enclosure = "\"";
     private $escape = "\\";
 
