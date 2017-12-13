@@ -1,0 +1,8 @@
+{
+    "name": "rakdar/reactphp-csv",
+    "type": "library",
+    "license": "MIT",
+    "require": {
+        "react/stream": "^0.7.5"
+    }
+}
