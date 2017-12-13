@@ -6,7 +6,7 @@
  * Time: 22:37
  */
 
-namespace Rakdar\ReactPhp\Csv;
+namespace Rakdar\React\Csv;
 
 
 use Evenement\EventEmitterInterface;
