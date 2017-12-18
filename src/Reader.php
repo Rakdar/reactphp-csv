@@ -1,36 +1,30 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: karsten
- * Date: 10.12.17
- * Time: 22:37
- */
 
 namespace Rakdar\React\Csv;
-
 
 use Evenement\EventEmitterInterface;
 use Evenement\EventEmitterTrait;
 use React\Stream\ReadableStreamInterface;
 use React\Stream\Util;
+use React\Stream\WritableStreamInterface;
 
 class Reader implements EventEmitterInterface
 {
     use EventEmitterTrait;
 
     /** @var ReadableStreamInterface $stream */
-    private $stream;
+    protected $stream;
 
     /** @var resource $buffer */
-    private $buffer;
-    private $paused = false;
-    private $delimiter = ",";
-    private $enclosure = "\"";
-    private $escape = "\\";
+    protected $buffer;
+    protected $paused = false;
+    protected $delimiter = ",";
+    protected $enclosure = "\"";
+    protected $escape = "\\";
 
     /**
      * Reader constructor.
-     * @param $buffer
+     * @param WritableStreamInterface $stream
      */
     public function __construct(ReadableStreamInterface $stream)
     {
@@ -38,7 +32,7 @@ class Reader implements EventEmitterInterface
         $this->buffer = fopen("php://memory", "c+");
 
         $this->stream->on("data", [$this, "handleData"]);
-        
+
         Util::forwardEvents($this->stream, $this, ["end", "error", "close"]);
     }
 
@@ -72,15 +66,15 @@ class Reader implements EventEmitterInterface
         fputs($this->buffer, $dataRemainig);
     }
 
+    public function isPaused()
+    {
+        return $this->paused;
+    }
+
     public function pause()
     {
         $this->stream->pause();
         $this->paused = true;
-    }
-
-    public function isPaused()
-    {
-        return $this->paused;
     }
 
     public function resume()
