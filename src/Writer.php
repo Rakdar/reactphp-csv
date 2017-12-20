@@ -2,11 +2,15 @@
 
 namespace Rakdar\React\Csv;
 
+use Evenement\EventEmitterInterface;
+use Evenement\EventEmitterTrait;
 use React\Stream\Util;
 use React\Stream\WritableStreamInterface;
 
-class Writer
+class Writer implements EventEmitterInterface
 {
+    use EventEmitterTrait;
+
     protected $buffer;
 
     protected $stream;
@@ -33,8 +37,8 @@ class Writer
         fputcsv(
             $this->buffer,
             $data,
-            $this->enclosure,
             $this->delimiter,
+            $this->enclosure,
             $this->escape
         );
 
