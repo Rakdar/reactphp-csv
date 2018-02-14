@@ -6,11 +6,13 @@ use Evenement\EventEmitterInterface;
 use Evenement\EventEmitterTrait;
 use React\Stream\ReadableStreamInterface;
 use React\Stream\Util;
-use React\Stream\WritableStreamInterface;
 
 class Reader implements EventEmitterInterface
 {
     use EventEmitterTrait;
+
+    const EVENT_HEADER = 'header';
+    const EVENT_DATA = 'data';
 
     /** @var ReadableStreamInterface $stream */
     protected $stream;
@@ -18,13 +20,21 @@ class Reader implements EventEmitterInterface
     /** @var resource $buffer */
     protected $buffer;
     protected $paused = false;
+
+    /** @var null|array $header */
+    protected $header;
+    protected $parseHeader = true;
+    protected $headerParsed = false;
+
     protected $delimiter = ",";
     protected $enclosure = "\"";
     protected $escape = "\\";
 
+    protected $rowsParsed = 0;
+
     /**
      * Reader constructor.
-     * @param WritableStreamInterface $stream
+     * @param ReadableStreamInterface $stream
      */
     public function __construct(ReadableStreamInterface $stream)
     {
@@ -56,7 +66,17 @@ class Reader implements EventEmitterInterface
                 $this->stream->isReadable() === false
             ) {
                 $start = ftell($this->buffer);
-                $this->emit("data", [$field]);
+                ++$this->rowsParsed;
+                if (
+                    $this->headerParsed === false &&
+                    $this->parseHeader === true
+                ) {
+                    $this->header = $field;
+                    $this->headerParsed = true;
+                    $this->emit("header", [$field]);
+                } else {
+                    $this->emit("data", [$field]);
+                }
             }
         }
 
@@ -64,6 +84,11 @@ class Reader implements EventEmitterInterface
         $dataRemainig = stream_get_contents($this->buffer);
         ftruncate($this->buffer, 0);
         fputs($this->buffer, $dataRemainig);
+    }
+
+    public function setParseHeader($parseHeader)
+    {
+        $this->parseHeader = (bool)$parseHeader;
     }
 
     public function isPaused()
@@ -94,6 +119,16 @@ class Reader implements EventEmitterInterface
         rewind($this->buffer);
         ftruncate($this->buffer, 0);
         $this->stream->close();
+    }
+
+    public function getHeader()
+    {
+        return $this->header;
+    }
+
+    public function getRowsParsed()
+    {
+        return $this->rowsParsed;
     }
 
     public function setDelimiter($delimiter)

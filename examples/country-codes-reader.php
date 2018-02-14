@@ -12,8 +12,13 @@ chdir(__DIR__);
 include '../vendor/autoload.php';
 
 $loop = Factory::create();
-$input = new Reader(new ReadableResourceStream(fopen('country-codes.csv', 'r'), $loop));
+
+$start = microtime();
+$inputFd = fopen('country-codes.csv', 'rn');
+$end = microtime();
+$input = new Reader(new ReadableResourceStream($inputFd, $loop));
 $input->setDelimiter(",");
+$input->setParseHeader(false);
 
 $input->on('data', function ($field) {
     echo $field[10] . PHP_EOL;
