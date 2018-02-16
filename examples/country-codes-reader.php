@@ -14,7 +14,7 @@ include '../vendor/autoload.php';
 $loop = Factory::create();
 
 $start = microtime();
-$inputFd = fopen('country-codes.csv', 'rn');
+$inputFd = fopen('country-codes.csv', 'r');
 $end = microtime();
 $input = new Reader(new ReadableResourceStream($inputFd, $loop));
 $input->setDelimiter(",");
