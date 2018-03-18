@@ -7,6 +7,11 @@ use Evenement\EventEmitterTrait;
 use React\Stream\ReadableStreamInterface;
 use React\Stream\Util;
 
+/**
+ * Object to parse a csv-stream into its separate elements
+ *
+ * @package Rakdar\React\Csv
+ */
 class Reader implements EventEmitterInterface
 {
     use EventEmitterTrait;
@@ -46,12 +51,23 @@ class Reader implements EventEmitterInterface
         Util::forwardEvents($this->stream, $this, ["end", "error", "close"]);
     }
 
+    /**
+     * Handles the data emitted from the receiving stream.
+     *
+     * @param $data
+     * @return void
+     */
     public function handleData($data)
     {
         fputs($this->buffer, $data);
         $this->parseBuffer();
     }
 
+    /**
+     * Tries to parse the buffer and emits header- or data-events.
+     *
+     * @return void
+     */
     public function parseBuffer()
     {
         rewind($this->buffer);
@@ -86,22 +102,43 @@ class Reader implements EventEmitterInterface
         fputs($this->buffer, $dataRemainig);
     }
 
+    /**
+     * Defines if the first row shold be handled separately as header.
+     *
+     * @param $parseHeader bool
+     * @return void
+     */
     public function setParseHeader($parseHeader)
     {
         $this->parseHeader = (bool)$parseHeader;
     }
 
+    /**
+     * Checks if parsing is paused.
+     *
+     * @return bool
+     */
     public function isPaused()
     {
         return $this->paused;
     }
 
+    /**
+     * Pauses the underlying stream and pauses emitting data-events.
+     *
+     * @return void
+     */
     public function pause()
     {
         $this->stream->pause();
         $this->paused = true;
     }
 
+    /**
+     * Resumes the underlying stream and starts parsing the buffer.
+     *
+     * @return void
+     */
     public function resume()
     {
         $this->paused = false;
@@ -114,6 +151,11 @@ class Reader implements EventEmitterInterface
         }
     }
 
+    /**
+     * Stops emitting events and closes the underlying stream.
+     *
+     * @return void
+     */
     public function close()
     {
         rewind($this->buffer);
@@ -121,26 +163,51 @@ class Reader implements EventEmitterInterface
         $this->stream->close();
     }
 
+    /**
+     * Returns the header-field in case {@see setParseHeader} is set to true.
+     *
+     * @return array|null
+     */
     public function getHeader()
     {
         return $this->header;
     }
 
+    /**
+     * Returns the number of rows parsed, including the optional header-row.
+     *
+     * @return int
+     */
     public function getRowsParsed()
     {
         return $this->rowsParsed;
     }
 
+    /**
+     * Sets the delimiter character.
+     *
+     * @param $delimiter string
+     */
     public function setDelimiter($delimiter)
     {
         $this->delimiter = mb_substr($delimiter, 0, 1);
     }
 
+    /**
+     * Sets the enclosure character.
+     *
+     * @param $enclosure string
+     */
     public function setEnclosure($enclosure)
     {
         $this->enclosure = mb_substr($enclosure, 0, 1);
     }
 
+    /**
+     * Sets the escape character.
+     *
+     * @param $escape string
+     */
     public function setEscape($escape)
     {
         $this->escape = mb_substr($escape, 0, 1);
